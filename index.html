@@ -132,6 +132,16 @@
         <p style="font-size: 14px; opacity: 0.9;">Questions? Reply to Dan's message anytime.</p>
     </div>
 
+    <!-- Fallback summary + email box -->
+    <div id="emailFallback" style="display:none; margin:20px; margin-top:0; padding:20px; background:#fff3cd; border-radius:8px; border:1px solid #ffe58f;">
+        <h3 style="margin-top:0;">No WhatsApp?</h3>
+        <p>If WhatsApp doesn’t open or you don’t use it, you can email Dan instead.</p>
+        <p>Tap the button below and your email app will open with your BMW enquiry pre‑filled. Just check it and press send.</p>
+        <button id="emailFallbackButton" style="margin-top:10px; background:#003087; color:#fff; border:none; padding:10px 16px; border-radius:6px; font-size:15px; cursor:pointer;">
+            Email my enquiry instead
+        </button>
+    </div>
+
     <script>
         const DAN_PHONE = '447827138197';
 
@@ -187,7 +197,7 @@
                 notes: document.getElementById('notes').value || 'None'
             };
 
-            // Build WhatsApp message
+            // Build WhatsApp PX message
             let pxMessage = '';
             if (fields.has_px === 'yes') {
                 pxMessage = `
@@ -207,6 +217,7 @@
 🚗 No part exchange`;
             }
 
+            // WhatsApp message
             const danMessage = `🆕 Information
 
 📞 Name: ${fields.contact}
@@ -223,10 +234,52 @@
 📝 Notes: ${fields.notes}
 Press Send ➡️`;
 
+            // Email subject + body for fallback
+            const emailSubject = `BMW enquiry from ${fields.contact || 'customer'}`;
+
+            const emailBody =
+`Name: ${fields.contact}
+
+Interest: ${fields.interest}
+Model: ${fields.model}
+
+Budget: ${fields.budget}
+Deposit: ${fields.deposit}
+Finance: ${fields.finance}
+
+Annual mileage: ${fields.mileage}
+Spec preferences: ${fields.spec}
+Timeline: ${fields.timeline}
+
+Part exchange: ${fields.has_px === 'yes' ? 'Yes' : 'No'}
+PX registration: ${fields.px_reg}
+PX details / mileage & condition: ${fields.px_mileage || 'Not provided'}
+PX settlement: ${fields.px_settlement}
+
+Notes: ${fields.notes}
+
+(If anything above is not correct, feel free to edit it before sending.)`;
+
             // Show customer thank you
             document.getElementById('result').style.display = 'block';
             document.getElementById('bmwForm').style.display = 'none';
             document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+
+            // Show email fallback box
+            document.getElementById('emailFallback').style.display = 'block';
+
+            // Wire up email button (once)
+            const emailBtn = document.getElementById('emailFallbackButton');
+            if (emailBtn && !emailBtn.dataset.bound) {
+                emailBtn.addEventListener('click', () => {
+                    const mailtoLink =
+                        'mailto:daniel.cane@hedinautomotive.co.uk' +
+                        '?subject=' + encodeURIComponent(emailSubject) +
+                        '&body=' + encodeURIComponent(emailBody);
+                    window.location.href = mailtoLink;
+                });
+                emailBtn.dataset.bound = 'true';
+            }
 
             // Auto-open WhatsApp to DAN (you)
             setTimeout(() => {
